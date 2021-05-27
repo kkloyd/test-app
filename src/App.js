@@ -1,5 +1,5 @@
 import { Alert, Space, Table, Modal } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import { GET } from "./api";
 import "./App.css";
@@ -21,25 +21,41 @@ const initialInfoModal = {
 
 function App() {
   const [tableData, setTableData] = useState(null);
+  const [responseData, setResponseData] = useState(null);
   const [infoModal, setInfoModal] = useState(initialInfoModal);
 
   const { isLoading, error, data } = useQuery("responseData", () =>
     GET(`/illustration?count=100&page=1`).then((res) => {
       if (res.status === 200) {
-        setTableData(res.data.result.illustrationData);
+        setResponseData(res.data.result.illustrationData)
       }
     })
-  );
+  )
 
-  if (error) return <Alert message="Request Error" type="error" />;
+  useEffect(() => {
+    if (responseData) handleSearch("")
+  }, [responseData])
 
   const handleModalClose = () => {
     setInfoModal(initialInfoModal);
-  };
+  }
+
+  const handleSearch = (input) => {
+    let filteredData
+    if (!input) filteredData = responseData
+    else {
+      filteredData = responseData.filter(i => {
+        return i.id == input || i.name.includes(input)
+      })
+    }
+    setTableData(filteredData)
+  }
+
+  if (error) return <Alert message="Request Error" type="error" />;
 
   return (
     <Space direction="vertical" className="App">
-      <SearchInput className="mb-10" />
+      <SearchInput className="mb-10" handleSearch={handleSearch} />
       <Table
         loading={isLoading}
         dataSource={tableData}
@@ -66,6 +82,7 @@ function App() {
         footer={null}
         onCancel={handleModalClose}
       >
+        <p>ID: {infoModal.record.id}</p>
         <p>Name: {infoModal.record.name}</p>
         <p>Keywords: {infoModal.record.keywords.join(", ")}</p>
         <p>Created Date: {infoModal.record.createdDate}</p>

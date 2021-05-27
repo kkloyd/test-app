@@ -1,16 +1,20 @@
 import React from "react";
 import { Input } from "antd";
-import { AudioOutlined } from "@ant-design/icons";
 
 const { Search } = Input;
 
-function SearchInput({input}) {
+function SearchInput({handleSearch}) {
   return (
-    <Search placeholder="input search text" onSearch={onSearch} enterButton />
+    <Search 
+      placeholder="input search text" 
+      enterButton 
+      allowClear 
+      onSearch={onSearch} 
+    />
   );
 
-  function onSearch() {
-    console.info("search");
+  function onSearch(val) {
+    handleSearch(val)
   }
 }
 
